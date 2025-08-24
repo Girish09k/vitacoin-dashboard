@@ -1,19 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import '../styles/TransactionHiFlow.css';  // Import related styles
-import { fetchUserTransactions } from '../api/api'; // Adjust import path if needed
+import React, { useEffect, useState } from 'react';
+import { fetchUserTransactions } from '../api/api';
+import '../styles/TransactionHiFlow.css';
 
 const TransactionHiFlow = ({ userId }) => {
   const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
     if (!userId) return;
-
+    
     fetchUserTransactions(userId)
-      .then((data) => setTransactions(data))
-      .catch((err) => {
-        console.error('Failed to fetch transactions:', err);
-        setTransactions([]);
-      });
+      .then(setTransactions)
+      .catch(() => setTransactions([]));
   }, [userId]);
 
   return (

@@ -10,9 +10,7 @@ export const SocketProvider = ({ userId, children }) => {
     if (!userId) return;
 
     const socketInstance = io('http://localhost:5000');
-
     socketInstance.emit('subscribeToUser', userId);
-
     setSocket(socketInstance);
 
     return () => {

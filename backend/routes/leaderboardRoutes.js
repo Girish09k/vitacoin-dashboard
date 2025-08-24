@@ -3,10 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const authMiddleware = require('../middleware/authMiddleware');
 
-// --------------------
-// PUBLIC LEADERBOARD
-// --------------------
-// (Leaderboard is usually public, so people can see top performers)
+// Public leaderboard - top 10 by coin balance
 router.get('/', async (req, res) => {
   try {
     const users = await User.find()
@@ -23,16 +20,13 @@ router.get('/', async (req, res) => {
 
     res.json(leaderboard);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ message: err.message });
   }
 });
 
-// --------------------
-// (OPTIONAL) AUTH-PROTECTED PERSONALIZED VIEW
-// --------------------
+// Authenticated user rank & personalized view
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    // Find the current logged-in user’s rank
     const users = await User.find().populate('badges').sort({ coinBalance: -1 });
 
     const leaderboard = users.map((user, index) => ({
@@ -43,7 +37,7 @@ router.get('/me', authMiddleware, async (req, res) => {
       badgesCount: user.badges.length,
     }));
 
-    const myStats = leaderboard.find(entry => entry._id.toString() === req.user.id);
+    const myStats = leaderboard.find(entry => entry._id.toString() === req.user.userId);
 
     res.json({ myStats, top10: leaderboard.slice(0, 10) });
   } catch (err) {
@@ -52,5 +46,3 @@ router.get('/me', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
-
-

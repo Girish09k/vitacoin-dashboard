@@ -8,19 +8,19 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 router.use(authMiddleware);
 
-// Enhanced badge checking function including monthly spending badges
+// Badge awarding helper function with monthly spending calculation
 const checkAndAwardBadges = async (user, io) => {
   const badges = await Badge.find();
 
-  // Calculate total spending (deductions) in the current month
   const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
   const endOfMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0);
 
   const monthlySpendingTransactions = await Transaction.aggregate([
-    { $match: {
+    {
+      $match: {
         user: mongoose.Types.ObjectId(user._id),
         type: 'deduction',
-        date: { $gte: startOfMonth, $lte: endOfMonth }
+        date: { $gte: startOfMonth, $lte: endOfMonth },
       }
     },
     { $group: { _id: null, totalSpent: { $sum: "$amount" } } }
@@ -29,31 +29,28 @@ const checkAndAwardBadges = async (user, io) => {
   const monthlySpending = monthlySpendingTransactions.length > 0 ? monthlySpendingTransactions[0].totalSpent : 0;
 
   for (const badge of badges) {
-    // Skip badges already earned by this user
-    if (user.badges.some(badgeId => badgeId.equals(badge._id))) continue;
+    if (user.badges.some(b => b.equals(badge._id))) continue;
 
-    // Award spending badges based on monthly deductions
-    if (badge.name === "Bronze Spender" && monthlySpending >= 100) {
+    if (badge.name === 'Bronze Spender' && monthlySpending >= 100) {
       user.badges.push(badge._id);
       await user.save();
       io.to(user._id.toString()).emit('badgeEarned', { badge });
-    } else if (badge.name === "Silver Spender" && monthlySpending >= 500) {
+    } else if (badge.name === 'Silver Spender' && monthlySpending >= 500) {
       user.badges.push(badge._id);
       await user.save();
       io.to(user._id.toString()).emit('badgeEarned', { badge });
-    } else if (badge.name === "Gold Spender" && monthlySpending >= 1000) {
+    } else if (badge.name === 'Gold Spender' && monthlySpending >= 1000) {
       user.badges.push(badge._id);
       await user.save();
       io.to(user._id.toString()).emit('badgeEarned', { badge });
     }
   }
 
-  // Existing "Vitacoin Master" badge logic
   const vitacoinMasterBadge = badges.find(b => b.name === 'Vitacoin Master');
   if (
     vitacoinMasterBadge &&
     user.coinBalance >= 100 &&
-    !user.badges.some(badgeId => badgeId.equals(vitacoinMasterBadge._id))
+    !user.badges.some(b => b.equals(vitacoinMasterBadge._id))
   ) {
     user.badges.push(vitacoinMasterBadge._id);
     await user.save();
@@ -61,11 +58,11 @@ const checkAndAwardBadges = async (user, io) => {
   }
 };
 
-// POST create a new transaction for authenticated user
+// Create a transaction
 router.post('/', async (req, res) => {
   try {
     const { type, amount, description } = req.body;
-    const userId = req.user.userId; // userId from token
+    const userId = req.user.userId;
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -95,7 +92,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET transactions for a user
+// Get all transactions for a user
 router.get('/:userId', async (req, res) => {
   try {
     const transactions = await Transaction.find({ user: req.params.userId }).sort({ date: -1 });
