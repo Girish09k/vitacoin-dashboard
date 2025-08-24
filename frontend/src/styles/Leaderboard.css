@@ -1,0 +1,56 @@
+.leaderboard-container {
+  margin-top: 25px;
+  background-color: #fff;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: 0 7px 17px rgb(0 0 0 / 10%);
+}
+
+.leaderboard-list {
+  list-style: none;
+  padding-left: 0;
+  max-height: 350px;
+  overflow-y: auto;
+  margin: 0;
+}
+
+.leaderboard-item {
+  display: grid;
+  grid-template-columns: 40px 1fr 140px 110px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 0.95rem;
+  color: #222;
+}
+
+.leaderboard-item:last-child {
+  border-bottom: none;
+}
+
+.rank {
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.username {
+  font-weight: 600;
+}
+
+.coins {
+  font-weight: 600;
+  color: #28a745; /* green */
+  text-align: right;
+}
+
+.badges-count {
+  font-weight: 600;
+  color: #007bff; /* blue */
+  text-align: right;
+}
+
+.current-user {
+  background-color: #ffffe0;
+  font-weight: 700;
+  border-left: 4px solid #ffd700; /* gold indicator */
+}
